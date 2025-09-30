@@ -24,113 +24,88 @@ export default function HomePage() {
     );
   }
 
-  const features = [
+  const highlights = [
     {
-      title: "Reservas inteligentes",
-      description: "Visualize rapidamente quem está usando as licenças e antecipe conflitos com alertas automáticos.",
-      gradient: "from-brand-teal/20 to-brand-mint/10",
-      text: "text-brand-teal"
+      title: "Status rápido",
+      caption: "Reservas",
+      accent: "from-brand-teal/70 via-brand-mint/40 to-transparent"
     },
     {
-      title: "Fluxo colaborativo",
-      description: "Convide times, distribua acessos e acompanhe status com um painel intuitivo e responsivo.",
-      gradient: "from-brand-amber/25 to-brand-terracotta/10",
-      text: "text-brand-amber dark:text-brand-peach"
+      title: "Equipe alinhada",
+      caption: "Fluxos",
+      accent: "from-brand-amber/60 via-brand-terracotta/30 to-transparent"
     },
     {
-      title: "Insights em tempo real",
-      description: "Monitoramento contínuo de reservas, devoluções e bloqueios para decisões baseadas em dados.",
-      gradient: "from-brand-leaf/20 to-brand-lime/10",
-      text: "text-brand-leaf"
-    },
-    {
-      title: "Segurança corporativa",
-      description: "Autenticação e redefinição de senha com proteção reforçada e rastreabilidade.",
-      gradient: "from-brand-olive/25 to-brand-teal/10",
-      text: "text-brand-olive"
+      title: "Segurança nativa",
+      caption: "Acessos",
+      accent: "from-brand-leaf/60 via-brand-lime/30 to-transparent"
     }
   ];
 
-  const badges = [
-    "Dark & Light mode automáticos",
-    "Interface responsiva",
-    "Paleta QA exclusiva"
-  ];
+  const chips = ["Dark mode", "Gestão ágil", "BrowserStack"];
 
   return (
-    <main className="relative isolate flex min-h-screen flex-col justify-center overflow-hidden px-4 py-16 sm:px-6 lg:px-12">
-      <div className="pointer-events-none absolute inset-0 -z-30 bg-soft-grid opacity-50 [mask-image:radial-gradient(ellipse_at_center,rgba(0,0,0,0.9)_0%,transparent_70%)]" />
-      <div className="absolute -left-32 top-24 -z-20 h-80 w-80 rounded-full bg-brand-teal/20 blur-3xl dark:bg-brand-mint/20" />
-      <div className="absolute -right-24 bottom-16 -z-20 h-96 w-96 rounded-full bg-brand-amber/25 blur-3xl dark:bg-brand-olive/25" />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-12">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3 rounded-full border border-border/60 bg-surface/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-muted shadow-sm backdrop-blur">
-            <span className="h-2.5 w-2.5 rounded-full bg-brand-teal" />
-            <span>Quality Digital</span>
+    <main className="relative isolate flex min-h-screen flex-col justify-center overflow-hidden px-6 py-16 sm:px-10 lg:px-16">
+      <div className="pointer-events-none absolute inset-0 -z-30 bg-soft-grid opacity-40 [mask-image:radial-gradient(ellipse_at_center,rgba(0,0,0,0.85)_0%,transparent_70%)]" />
+      <div className="absolute -top-24 left-1/2 -z-20 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-mint/25 blur-3xl dark:bg-brand-teal/20" />
+      <div className="mx-auto grid w-full max-w-5xl gap-12 lg:grid-cols-[1fr_auto] lg:items-center">
+        <header className="space-y-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 rounded-full border border-border/60 bg-surface/80 px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-muted shadow-sm backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-brand-teal" />
+              QA Manager
+            </div>
+            <ThemeToggle />
           </div>
-          <ThemeToggle />
-        </div>
 
-        <div className="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:items-center">
-          <section className="space-y-10 text-balance">
-            <div className="space-y-6">
-              <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-surface-elevated/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-brand-teal shadow-sm">
-                Novo visual
+          <div className="space-y-4 text-balance">
+            <h1 className="text-4xl font-semibold text-foreground sm:text-5xl">Operação limpa, foco no teste</h1>
+            <p className="max-w-xl text-base text-muted">
+              Tudo o que importa para controlar reservas BrowserStack com clareza imediata.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 text-xs text-muted">
+            {chips.map((chip) => (
+              <span
+                key={chip}
+                className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-surface-elevated/80 px-4 py-2 font-medium text-foreground/80 shadow-sm"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-brand-mint" />
+                {chip}
               </span>
-              <div className="space-y-4">
-                <h1 className="text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-                  Um layout dinâmico para acelerar a gestão do BrowserStack
-                </h1>
-                <p className="text-lg text-muted">
-                  Modernizamos o QA Manager com uma experiência elegante, centrada no fluxo do time e pronta para o modo claro ou escuro.
-                </p>
-              </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {features.map((feature) => (
-                <article
-                  key={feature.title}
-                  className="group relative overflow-hidden rounded-2xl border border-border/60 bg-surface/90 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-                >
-                  <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${feature.gradient}`} aria-hidden="true" />
-                  <h3 className={`text-base font-semibold ${feature.text}`}>{feature.title}</h3>
-                  <p className="mt-2 text-sm text-muted">{feature.description}</p>
-                </article>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-3 text-sm text-muted">
-              {badges.map((badge) => (
-                <span
-                  key={badge}
-                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-surface-elevated/80 px-4 py-2 font-medium text-foreground/80 shadow-sm"
-                >
-                  <span className="h-2 w-2 rounded-full bg-brand-mint" />
-                  {badge}
-                </span>
-              ))}
-            </div>
+          <section className="grid gap-4 sm:grid-cols-3">
+            {highlights.map((item) => (
+              <article
+                key={item.title}
+                className="relative overflow-hidden rounded-2xl border border-border/60 bg-surface/90 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${item.accent}`} aria-hidden="true" />
+                <p className="text-xs uppercase tracking-[0.3em] text-muted">{item.caption}</p>
+                <h2 className="mt-3 text-lg font-semibold text-foreground">{item.title}</h2>
+              </article>
+            ))}
           </section>
+        </header>
 
-          <section className="relative">
-            <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-br from-brand-teal/25 via-brand-mint/10 to-brand-amber/25 blur-2xl" aria-hidden="true" />
-            <div className="relative rounded-3xl border border-border/60 bg-surface/90 p-8 shadow-2xl shadow-brand-teal/10 backdrop-blur-xl dark:border-border/40 dark:bg-surface/80">
-              <header className="space-y-3 text-center lg:text-left">
-                <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-brand-teal">
-                  Acesso seguro
-                </span>
-                <h2 className="text-2xl font-semibold text-foreground">QA Manager</h2>
-                <p className="text-sm text-muted">
-                  Faça login com seu e-mail corporativo e organize os testes no BrowserStack sem fricções.
-                </p>
-              </header>
-              <div className="mt-8">
-                <LoginForm />
-              </div>
+        <section className="relative">
+          <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-br from-brand-teal/30 via-brand-mint/20 to-brand-amber/20 blur-2xl" aria-hidden="true" />
+          <div className="relative w-full rounded-3xl border border-border/60 bg-surface/90 p-8 shadow-2xl shadow-brand-teal/10 backdrop-blur-xl dark:border-border/40 dark:bg-surface/80">
+            <div className="space-y-3 text-center">
+              <span className="inline-flex items-center justify-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-teal">
+                Entrar
+              </span>
+              <h2 className="text-2xl font-semibold text-foreground">Painel QA</h2>
+              <p className="text-sm text-muted">Acesso rápido e seguro.</p>
             </div>
-          </section>
-        </div>
+            <div className="mt-8">
+              <LoginForm />
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
