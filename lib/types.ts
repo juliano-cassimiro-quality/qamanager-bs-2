@@ -4,10 +4,12 @@ export interface Account {
   id: string;
   username: string;
   email: string;
+  password?: string | null;
   status: AccountStatus;
   owner?: string | null;
   ownerId?: string | null;
   lastUsedAt?: string | null;
+  lastReturnedAt?: string | null;
   history?: AccountHistoryEntry[];
 }
 

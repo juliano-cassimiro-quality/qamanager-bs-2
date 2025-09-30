@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatRelative, parseISO } from "date-fns";
+import { format, formatRelative, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { reserveAccount, releaseAccount, fetchAccountHistory } from "@/lib/firestore";
 import type { Account, AccountHistoryEntry } from "@/lib/types";
@@ -94,7 +94,7 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
               </span>
             </header>
 
-            <dl className="mt-4 grid gap-3 text-sm text-slate-500 md:grid-cols-3">
+            <dl className="mt-4 grid gap-3 text-sm text-slate-500 md:grid-cols-2 lg:grid-cols-5">
               <div>
                 <dt className="font-medium text-slate-600">Responsável</dt>
                 <dd>{account.owner ?? "-"}</dd>
@@ -105,6 +105,24 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
                   {account.lastUsedAt
                     ? formatRelative(parseISO(account.lastUsedAt), new Date(), { locale: ptBR })
                     : "Nunca"}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-slate-600">Última devolução</dt>
+                <dd>
+                  {account.lastReturnedAt
+                    ? formatRelative(parseISO(account.lastReturnedAt), new Date(), { locale: ptBR })
+                    : "-"}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-slate-600">Senha</dt>
+                <dd className="font-mono text-slate-700">
+                  {account.password
+                    ? isBusy && !isOwner
+                      ? "Em uso"
+                      : account.password
+                    : "-"}
                 </dd>
               </div>
               <div>
@@ -151,7 +169,11 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
                       </span>
                       <span>
                         {entry.timestamp
-                          ? formatRelative(new Date(entry.timestamp), new Date(), { locale: ptBR })
+                          ? `${format(new Date(entry.timestamp), "dd/MM/yyyy", { locale: ptBR })} às ${format(
+                              new Date(entry.timestamp),
+                              "HH:mm",
+                              { locale: ptBR }
+                            )}`
                           : "-"}
                       </span>
                     </li>
