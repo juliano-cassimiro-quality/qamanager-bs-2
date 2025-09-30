@@ -15,10 +15,11 @@ interface AccountListProps {
 }
 
 export function AccountList({ accounts, isLoading, error }: AccountListProps) {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [history, setHistory] = useState<Record<string, AccountHistoryEntry[]>>({});
   const [loadingHistory, setLoadingHistory] = useState<Record<string, boolean>>({});
   const [actionLoading, setActionLoading] = useState<Record<string, "reserve" | "release" | null>>({});
+  const canViewHistory = role === "admin";
 
   const handleReserve = async (account: Account) => {
     if (!user) return;
@@ -49,6 +50,9 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
   };
 
   const loadHistory = async (accountId: string) => {
+    if (!canViewHistory) {
+      return;
+    }
     setLoadingHistory((prev) => ({ ...prev, [accountId]: true }));
     try {
       const data = await fetchAccountHistory(accountId);
@@ -147,40 +151,42 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
               </div>
             </dl>
 
-            <section className="mt-4 border-t border-slate-100 pt-4">
-              <header className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-slate-700">Histórico recente</h3>
-                <button
-                  className="text-xs font-medium text-primary-600 hover:text-primary-700"
-                  onClick={() => loadHistory(account.id)}
-                >
-                  {loadingHistory[account.id] ? "Carregando..." : historyLoaded ? "Atualizar" : "Ver histórico"}
-                </button>
-              </header>
-              <ul className="mt-3 space-y-2 text-xs text-slate-500">
-                {loadingHistory[account.id] && <li>Carregando histórico...</li>}
-                {!loadingHistory[account.id] && historyLoaded && currentHistory.length === 0 && (
-                  <li>Nenhum registro encontrado.</li>
-                )}
-                {!loadingHistory[account.id] &&
-                  currentHistory.map((entry) => (
-                    <li key={entry.id} className="flex items-center justify-between">
-                      <span className="font-medium text-slate-600">
-                        {entry.action === "checkout" ? "Reservado" : "Liberado"} por {entry.userName ?? entry.email ?? entry.userId}
-                      </span>
-                      <span>
-                        {entry.timestamp
-                          ? `${format(new Date(entry.timestamp), "dd/MM/yyyy", { locale: ptBR })} às ${format(
-                              new Date(entry.timestamp),
-                              "HH:mm",
-                              { locale: ptBR }
-                            )}`
-                          : "-"}
-                      </span>
-                    </li>
-                  ))}
-              </ul>
-            </section>
+            {canViewHistory && (
+              <section className="mt-4 border-t border-slate-100 pt-4">
+                <header className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-slate-700">Histórico recente</h3>
+                  <button
+                    className="text-xs font-medium text-primary-600 hover:text-primary-700"
+                    onClick={() => loadHistory(account.id)}
+                  >
+                    {loadingHistory[account.id] ? "Carregando..." : historyLoaded ? "Atualizar" : "Ver histórico"}
+                  </button>
+                </header>
+                <ul className="mt-3 space-y-2 text-xs text-slate-500">
+                  {loadingHistory[account.id] && <li>Carregando histórico...</li>}
+                  {!loadingHistory[account.id] && historyLoaded && currentHistory.length === 0 && (
+                    <li>Nenhum registro encontrado.</li>
+                  )}
+                  {!loadingHistory[account.id] &&
+                    currentHistory.map((entry) => (
+                      <li key={entry.id} className="flex items-center justify-between">
+                        <span className="font-medium text-slate-600">
+                          {entry.action === "checkout" ? "Reservado" : "Liberado"} por {entry.userName ?? entry.email ?? entry.userId}
+                        </span>
+                        <span>
+                          {entry.timestamp
+                            ? `${format(new Date(entry.timestamp), "dd/MM/yyyy", { locale: ptBR })} às ${format(
+                                new Date(entry.timestamp),
+                                "HH:mm",
+                                { locale: ptBR }
+                              )}`
+                            : "-"}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </section>
+            )}
           </article>
         );
       })}

@@ -1,5 +1,6 @@
 import { getApps, initializeApp, cert, applicationDefault } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 
 const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
@@ -18,3 +19,4 @@ const firebaseAdminApp =
     : getApps()[0];
 
 export const adminDb = getFirestore(firebaseAdminApp);
+export const adminAuth = getAuth(firebaseAdminApp);
