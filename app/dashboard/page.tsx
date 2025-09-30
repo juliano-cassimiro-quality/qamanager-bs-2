@@ -11,17 +11,10 @@ import { InviteSection } from "@/components/dashboard/InviteSection";
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
-  const [statusFilter, setStatusFilter] = useState<"all" | "free" | "busy">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "free" | "busy">(
+    "all"
+  );
   const { accounts, isLoading, error } = useAccounts();
-
-  if (!loading && !user) {
-    router.replace("/");
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-slate-500">Redirecionando...</p>
-      </main>
-    );
-  }
 
   const filteredAccounts = useMemo(() => {
     if (!accounts) return [];
@@ -34,6 +27,15 @@ export default function DashboardPage() {
     return accounts;
   }, [accounts, statusFilter]);
 
+  if (!loading && !user) {
+    router.replace("/");
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-slate-500">Redirecionando...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-10">
       <DashboardHeader
@@ -41,7 +43,9 @@ export default function DashboardPage() {
         statusFilter={statusFilter}
         onFilterChange={setStatusFilter}
         totalAccounts={accounts?.length ?? 0}
-        busyAccounts={accounts?.filter((acc) => acc.status === "busy").length ?? 0}
+        busyAccounts={
+          accounts?.filter((acc) => acc.status === "busy").length ?? 0
+        }
         user={user}
       />
       <section className="grid gap-4 lg:grid-cols-[2fr,1fr]">

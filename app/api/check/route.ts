@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
+import { Account } from "@/lib/types";
 
 const ACCOUNTS_COLLECTION = "browserstackAccounts";
 
@@ -29,20 +30,29 @@ export async function GET() {
 
   try {
     const accountsSnapshot = await adminDb.collection(ACCOUNTS_COLLECTION).get();
-    const accounts = accountsSnapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Record<string, unknown>) }));
+    const accounts: Account[] = accountsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<Account, "id">),
+    }));
 
     const authHeader = Buffer.from(`${username}:${accessKey}`).toString("base64");
-    const response = await fetch("https://api.browserstack.com/automate/sessions.json?status=running&limit=100", {
-      headers: {
-        Authorization: `Basic ${authHeader}`,
-      },
-      cache: "no-cache",
-    });
+    const response = await fetch(
+      "https://api.browserstack.com/automate/sessions.json?status=running&limit=100",
+      {
+        headers: {
+          Authorization: `Basic ${authHeader}`,
+        },
+        cache: "no-cache",
+      }
+    );
 
     if (!response.ok) {
       const text = await response.text();
       console.error("Erro BrowserStack", text);
-      return NextResponse.json({ message: "Falha ao consultar BrowserStack" }, { status: 502 });
+      return NextResponse.json(
+        { message: "Falha ao consultar BrowserStack" },
+        { status: 502 }
+      );
     }
 
     const sessions = (await response.json()) as BrowserStackSession[];
@@ -55,7 +65,7 @@ export async function GET() {
     const batch = adminDb.batch();
 
     accounts.forEach((account) => {
-      const isBusy = busyUsers.has(String(account.username ?? account.id));
+      const isBusy = busyUsers.has(account.username ?? account.id);
       const ref = adminDb.collection(ACCOUNTS_COLLECTION).doc(account.id);
       batch.update(ref, {
         status: isBusy ? "busy" : "free",
