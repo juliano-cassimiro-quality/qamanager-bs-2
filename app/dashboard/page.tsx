@@ -17,6 +17,7 @@ export default function DashboardPage() {
     "all"
   );
   const { accounts, isLoading, error } = useAccounts();
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -64,8 +65,15 @@ export default function DashboardPage() {
     return accounts;
   }, [accounts, statusFilter]);
 
-  if (!loading && !user) {
-    router.replace("/");
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      setRedirecting(true);
+      router.replace("/");
+    }
+  }, [loading, router, user]);
+
+  if (redirecting) {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <p className="text-sm text-slate-500">Redirecionando...</p>

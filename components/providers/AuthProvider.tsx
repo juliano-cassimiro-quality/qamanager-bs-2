@@ -11,6 +11,7 @@ import {
   sendEmailVerification,
   User,
 } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { doc, onSnapshot } from "firebase/firestore";
 import { firebaseAuth } from "@/lib/firebase/client";
 import { firestore } from "@/lib/firebase/client";
@@ -123,12 +124,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const registerWithEmail = useCallback(
     async (email: string, password: string, displayName?: string) => {
       const normalizedEmail = ensureAllowedEmail(email);
-      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, normalizedEmail, password);
-      if (displayName) {
-        await updateProfile(userCredential.user, { displayName });
+      try {
+        const userCredential = await createUserWithEmailAndPassword(firebaseAuth, normalizedEmail, password);
+        if (displayName) {
+          await updateProfile(userCredential.user, { displayName });
+        }
+        await sendEmailVerification(userCredential.user).catch(() => undefined);
+        await firebaseSignOut(firebaseAuth);
+      } catch (error) {
+        if (error instanceof FirebaseError && error.code === "auth/operation-not-allowed") {
+          throw new Error("Criação automática de contas está desabilitada. Entre em contato com um administrador para obter acesso.");
+        }
+        throw error;
       }
-      await sendEmailVerification(userCredential.user).catch(() => undefined);
-      await firebaseSignOut(firebaseAuth);
     },
     [ensureAllowedEmail]
   );
