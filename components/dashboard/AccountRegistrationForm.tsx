@@ -5,14 +5,20 @@ import { FormEvent, useState } from "react";
 import { createAccount } from "@/lib/firestore";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { TextInput } from "@/components/ui/TextInput";
+import { useAuth } from "@/hooks/useAuth";
 
 export function AccountRegistrationForm() {
+  const { role } = useAuth();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  if (role !== "admin") {
+    return null;
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

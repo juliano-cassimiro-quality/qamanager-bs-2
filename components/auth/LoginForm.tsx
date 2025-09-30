@@ -6,63 +6,58 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { TextInput } from "@/components/ui/TextInput";
 
 export function LoginForm() {
-  const { signInWithGoogle, signInWithEmail, registerWithEmail } = useAuth();
+  const { signInWithEmail, registerWithEmail, sendPasswordReset, authError } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    setInfo(null);
     setLoading(true);
     try {
       if (mode === "login") {
         await signInWithEmail(email, password);
       } else {
         await registerWithEmail(email, password, name);
+        setInfo("Conta criada. Enviamos um e-mail de verificação para ativar o acesso.");
+        setMode("login");
       }
     } catch (err) {
       console.error(err);
-      setError(
-        mode === "login"
-          ? "Não foi possível realizar o login. Verifique as credenciais."
-          : "Não foi possível criar a conta."
-      );
+      setError((err as Error).message ?? "Não foi possível concluir a solicitação.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handlePasswordReset = async () => {
+    if (!email) {
+      setError("Informe um e-mail corporativo para redefinir a senha.");
+      return;
+    }
+    setError(null);
+    setInfo(null);
+    setResetLoading(true);
+    try {
+      await sendPasswordReset(email);
+      setInfo("Enviamos um e-mail com instruções para redefinir sua senha.");
+    } catch (err) {
+      console.error(err);
+      setError((err as Error).message ?? "Não foi possível enviar o e-mail de redefinição.");
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <PrimaryButton
-          type="button"
-          onClick={() => signInWithGoogle()}
-          className="w-full bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
-        >
-          <span className="mr-2 inline-flex h-5 w-5 items-center justify-center">
-            <svg className="h-5 w-5" viewBox="0 0 24 24">
-              <path
-                d="M21.35 11.1h-9.17v2.91h5.27c-.23 1.24-1.36 3.64-5.27 3.64A6.09 6.09 0 0 1 6.05 11.5 6.09 6.09 0 0 1 12.18 5.4a5.52 5.52 0 0 1 3.77 1.43l2.56-2.56A9.31 9.31 0 0 0 12.18 2 9.5 9.5 0 1 0 21.7 11.5a6.58 6.58 0 0 0-.35-4.4z"
-                fill="#4285F4"
-              />
-            </svg>
-          </span>
-          Entrar com Google
-        </PrimaryButton>
-      </div>
-
-      <div className="relative flex items-center justify-center">
-        <span className="h-px w-full bg-slate-200" />
-        <span className="absolute rounded-full bg-white px-4 text-xs font-medium uppercase tracking-wider text-slate-400">
-          ou
-        </span>
-      </div>
-
       <form className="space-y-4" onSubmit={handleSubmit}>
         {mode === "register" && (
           <TextInput
@@ -74,8 +69,8 @@ export function LoginForm() {
           />
         )}
         <TextInput
-          label="E-mail"
-          placeholder="nome@empresa.com"
+          label="E-mail corporativo"
+          placeholder="nome@qualitydigital.global"
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
@@ -90,17 +85,36 @@ export function LoginForm() {
           minLength={6}
           required
         />
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {(error || (mode === "login" && authError)) && (
+          <p className="text-sm text-rose-600">{error ?? authError}</p>
+        )}
+        {info && <p className="text-sm text-emerald-700">{info}</p>}
         <PrimaryButton type="submit" className="w-full" disabled={loading}>
           {loading ? "Processando..." : mode === "login" ? "Entrar" : "Criar conta"}
         </PrimaryButton>
       </form>
 
+      {mode === "login" && (
+        <button
+          type="button"
+          onClick={handlePasswordReset}
+          disabled={resetLoading}
+          className="w-full text-center text-xs font-medium text-primary-600 hover:text-primary-700 disabled:opacity-60"
+        >
+          {resetLoading ? "Enviando..." : "Esqueceu a senha?"}
+        </button>
+      )}
+
       <p className="text-center text-xs text-slate-500">
         {mode === "login" ? "Ainda não tem acesso?" : "Já possui uma conta?"}{" "}
         <button
+          type="button"
           className="font-medium text-primary-600 hover:text-primary-700"
-          onClick={() => setMode(mode === "login" ? "register" : "login")}
+          onClick={() => {
+            setMode(mode === "login" ? "register" : "login");
+            setError(null);
+            setInfo(null);
+          }}
         >
           {mode === "login" ? "Criar conta" : "Entrar"}
         </button>

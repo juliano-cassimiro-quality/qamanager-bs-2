@@ -1,19 +1,19 @@
 # QA Manager BrowserStack
 
-Aplicação Next.js para gerenciar o ciclo de uso de contas BrowserStack com autenticação Firebase, reservas, histórico e convites temporários.
+Aplicação Next.js para gerenciar o ciclo de uso de contas BrowserStack com autenticação Firebase, reservas e histórico de utilização.
 
 ## Requisitos
 
 - Node.js 18+
-- Conta Firebase com Authentication (Google + Email/Senha) e Firestore
+- Conta Firebase com Authentication (Email/Senha) e Firestore
 - Credenciais BrowserStack (username e access key)
 
 ## Configuração
 
 1. Crie um arquivo `.env.local` baseado em `.env.local.example` com as credenciais do Firebase e da BrowserStack.
-2. Configure o serviço de Authentication no Firebase para permitir Google Sign-In e Email/Senha.
+2. Configure o serviço de Authentication no Firebase para permitir apenas login por Email/Senha e exigir verificação de e-mail.
 3. Certifique-se de que a coleção `browserstackAccounts` já possui os documentos importados da planilha (`id`, `username`, `email`, `status`, `owner`, `lastUsedAt`).
-4. Opcional: configure regras do Firestore para permitir leitura conforme o modelo de segurança desejado.
+4. Opcional: configure regras do Firestore para permitir leitura conforme o modelo de segurança desejado e defina os papéis (`user` ou `admin`) na coleção `userRoles`.
 
 ## Scripts
 
@@ -26,11 +26,9 @@ npm start
 
 ## Estrutura
 
-- `/` – Tela de login com Google ou email/senha.
-- `/dashboard` – Painel autenticado com filtros, histórico, ações de reservar/liberar e geração de links de convite.
-- `/invite/[token]` – Página simplificada para convidados reservarem contas livres.
+- `/` – Tela de login com e-mail corporativo e senha.
+- `/dashboard` – Painel autenticado com filtros, histórico, ações de reservar/liberar e visão administrativa (para administradores).
 - `/api/check` – Rota de API que sincroniza o status das contas consultando a BrowserStack.
-- `/api/invites` – Rota autenticada para gerar convites.
 
 ## Verificação Automática
 

@@ -30,14 +30,14 @@ export interface AccountLogInput {
   email?: string | null;
 }
 
-export interface Invite {
+export type UserRole = "admin" | "user";
+
+export interface AccountLog {
   id: string;
-  token: string;
-  createdAt: string;
-  createdBy: string;
-  inviteeEmail?: string;
-  label?: string;
-  expiresAt?: string;
-  maxUses?: number;
-  remainingUses?: number;
+  accountId: string;
+  action: "checkout" | "checkin";
+  userId: string;
+  userName?: string | null;
+  email?: string | null;
+  timestamp: string | null;
 }
