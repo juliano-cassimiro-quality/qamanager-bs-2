@@ -355,58 +355,6 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
             </div>
           </InsightPanel>
         </div>
-
-        <InsightPanel
-          title="Histórico por conta"
-          description="Últimas movimentações de cada credencial."
-        >
-          <div className="grid gap-3 md:grid-cols-2">
-            {accounts.map((account) => {
-              const accountHistory = historyByAccount[account.id] ?? [];
-              return (
-                <div
-                  key={account.id}
-                  className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-600"
-                >
-                  <p className="font-semibold text-slate-700">
-                    {account.username}
-                  </p>
-                  <p className="font-mono text-slate-500">{account.email}</p>
-                  {accountHistory.length === 0 ? (
-                    <p className="mt-2 text-slate-500">
-                      Sem registros recentes.
-                    </p>
-                  ) : (
-                    <ul className="mt-2 space-y-1">
-                      {accountHistory.slice(0, 5).map((entry) => {
-                        const timestamp = safeParseTimestamp(entry.timestamp);
-                        const formatted = timestamp
-                          ? `${format(timestamp, "dd/MM", {
-                              locale: ptBR,
-                            })} ${format(timestamp, "HH:mm", { locale: ptBR })}`
-                          : "-";
-                        return (
-                          <li
-                            key={entry.id}
-                            className="flex justify-between gap-2"
-                          >
-                            <span className="font-medium text-slate-700">
-                              {entry.action === "checkout"
-                                ? "Reservado"
-                                : "Liberado"}{" "}
-                              por {entry.userName ?? entry.email ?? entry.userId}
-                            </span>
-                            <span className="text-slate-500">{formatted}</span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </InsightPanel>
       </div>
     </section>
   );
