@@ -20,12 +20,15 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
   const [loadingHistory, setLoadingHistory] = useState<Record<string, boolean>>({});
   const [actionLoading, setActionLoading] = useState<Record<string, "reserve" | "release" | null>>({});
   const canViewHistory = role === "admin";
-  const userHasActiveReservation = accounts.some(
-    (account) => account.status === "busy" && account.ownerId === user?.uid
-  );
+  const canManageReservations = role !== "admin";
+  const userHasActiveReservation = canManageReservations
+    ? accounts.some(
+        (account) => account.status === "busy" && account.ownerId === user?.uid
+      )
+    : false;
 
   const handleReserve = async (account: Account) => {
-    if (!user) return;
+    if (!user || !canManageReservations) return;
     setActionLoading((prev) => ({ ...prev, [account.id]: "reserve" }));
     try {
       await reserveAccount(account.id, {
@@ -43,7 +46,7 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
   };
 
   const handleRelease = async (account: Account) => {
-    if (!user) return;
+    if (!user || !canManageReservations) return;
     setActionLoading((prev) => ({ ...prev, [account.id]: "release" }));
     try {
       await releaseAccount(account.id, {
@@ -140,27 +143,35 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
               <div>
                 <dt className="font-medium text-slate-600">Ações</dt>
                 <dd className="mt-1 flex flex-wrap gap-2">
-                  {!isBusy && (
-                    <PrimaryButton
-                      onClick={() => handleReserve(account)}
-                      className="bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300"
-                      disabled={hasOtherReservation}
-                    >
-                      {actionLoading[account.id] === "reserve" ? "Reservando..." : "Reservar"}
-                    </PrimaryButton>
+                  {canManageReservations ? (
+                    <>
+                      {!isBusy && (
+                        <PrimaryButton
+                          onClick={() => handleReserve(account)}
+                          className="bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300"
+                          disabled={hasOtherReservation}
+                        >
+                          {actionLoading[account.id] === "reserve" ? "Reservando..." : "Reservar"}
+                        </PrimaryButton>
+                      )}
+                      <button
+                        onClick={() => handleRelease(account)}
+                        disabled={!isBusy || (isBusy && !isOwner)}
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:border-primary-200 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {actionLoading[account.id] === "release" ? "Liberando..." : "Liberar"}
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-xs font-medium text-slate-500">
+                      Reservas disponíveis apenas para colaboradores.
+                    </span>
                   )}
-                  <button
-                    onClick={() => handleRelease(account)}
-                    disabled={!isBusy || (isBusy && !isOwner)}
-                    className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:border-primary-200 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {actionLoading[account.id] === "release" ? "Liberando..." : "Liberar"}
-                  </button>
                 </dd>
               </div>
             </dl>
 
-            {hasOtherReservation && !isBusy && (
+            {hasOtherReservation && !isBusy && canManageReservations && (
               <p className="mt-3 text-xs font-medium text-amber-600">
                 Libere a sua conta atual antes de reservar outra.
               </p>

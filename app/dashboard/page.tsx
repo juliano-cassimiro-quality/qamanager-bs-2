@@ -18,6 +18,7 @@ export default function DashboardPage() {
   );
   const { accounts, isLoading, error } = useAccounts();
   const [redirecting, setRedirecting] = useState(false);
+  const isAdmin = role === "admin";
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -103,9 +104,15 @@ export default function DashboardPage() {
           />
         </div>
         <div className="space-y-4">
-          <QuickReservationCard accounts={accounts} isLoading={isLoading} user={user} />
-          {role === "admin" && <AccountRegistrationForm />}
-          {role === "admin" && accounts && <AdminUsageInsights accounts={accounts} />}
+          {!isAdmin && (
+            <QuickReservationCard
+              accounts={accounts}
+              isLoading={isLoading}
+              user={user}
+            />
+          )}
+          {isAdmin && <AccountRegistrationForm />}
+          {isAdmin && accounts && <AdminUsageInsights accounts={accounts} />}
         </div>
       </section>
     </main>
