@@ -16,8 +16,8 @@ export default async function RootLayout({
   await ensureDefaultAdmin();
 
   return (
-    <html lang="pt-BR">
-      <body className="min-h-screen bg-slate-100">
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className="min-h-screen bg-background font-sans">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

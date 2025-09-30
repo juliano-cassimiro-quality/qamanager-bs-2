@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
@@ -9,17 +10,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: "#f2f5ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          800: "#3730a3",
-          900: "#312e81"
+        background: "rgb(var(--background) / <alpha-value>)",
+        surface: {
+          DEFAULT: "rgb(var(--surface) / <alpha-value>)",
+          elevated: "rgb(var(--surface-elevated) / <alpha-value>)"
+        },
+        foreground: "rgb(var(--foreground) / <alpha-value>)",
+        muted: "rgb(var(--muted) / <alpha-value>)",
+        border: "rgb(var(--border) / <alpha-value>)",
+        brand: {
+          lime: "#A7C63D",
+          terracotta: "#E06D3C",
+          teal: "#1AA6B7",
+          peach: "#E9A99B",
+          mint: "#56B88C",
+          amber: "#F2B75C",
+          leaf: "#63B05B",
+          olive: "#9F8E3F"
         }
       }
     }

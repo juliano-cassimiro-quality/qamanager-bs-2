@@ -86,9 +86,9 @@ export function LoginForm() {
           required
         />
         {(error || (mode === "login" && authError)) && (
-          <p className="text-sm text-rose-600">{error ?? authError}</p>
+          <p className="text-sm text-brand-terracotta">{error ?? authError}</p>
         )}
-        {info && <p className="text-sm text-emerald-700">{info}</p>}
+        {info && <p className="text-sm text-brand-mint">{info}</p>}
         <PrimaryButton type="submit" className="w-full" disabled={loading}>
           {loading ? "Processando..." : mode === "login" ? "Entrar" : "Criar conta"}
         </PrimaryButton>
@@ -99,17 +99,17 @@ export function LoginForm() {
           type="button"
           onClick={handlePasswordReset}
           disabled={resetLoading}
-          className="w-full text-center text-xs font-medium text-primary-600 hover:text-primary-700 disabled:opacity-60"
+          className="w-full text-center text-xs font-semibold text-brand-teal transition hover:text-brand-mint disabled:opacity-60"
         >
           {resetLoading ? "Enviando..." : "Esqueceu a senha?"}
         </button>
       )}
 
-      <p className="text-center text-xs text-slate-500">
+      <p className="text-center text-xs text-muted">
         {mode === "login" ? "Ainda não tem acesso?" : "Já possui uma conta?"}{" "}
         <button
           type="button"
-          className="font-medium text-primary-600 hover:text-primary-700"
+          className="font-semibold text-brand-teal hover:text-brand-mint"
           onClick={() => {
             setMode(mode === "login" ? "register" : "login");
             setError(null);
