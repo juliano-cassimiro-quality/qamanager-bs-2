@@ -101,7 +101,7 @@ export function QuickReservationCard({ accounts, isLoading, user }: QuickReserva
       <header className="space-y-1">
         <h2 className="text-lg font-semibold text-slate-900">Uso rápido</h2>
         <p className="text-sm text-slate-500">
-          Clique em "Pegar conta" para receber automaticamente uma credencial livre. O horário de retirada e devolução é salvo
+          Clique em &quot;Pegar conta&quot; para receber automaticamente uma credencial livre. O horário de retirada e devolução é salvo
           no histórico.
         </p>
       </header>
@@ -122,7 +122,7 @@ export function QuickReservationCard({ accounts, isLoading, user }: QuickReserva
           </div>
         ) : (
           <p className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700">
-            Nenhuma conta reservada. Clique abaixo para pegar a próxima disponível.
+            Nenhuma conta reservada. Clique abaixo para pegar a pr&oacute;xima disponível.
           </p>
         )}
 
