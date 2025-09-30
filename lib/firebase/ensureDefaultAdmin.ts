@@ -11,6 +11,16 @@ const DEFAULT_ADMIN_DISPLAY_NAME =
 let initializationPromise: Promise<void> | null = null;
 
 async function initializeDefaultAdmin() {
+  const auth = adminAuth;
+  const db = adminDb;
+
+  if (!auth || !db) {
+    console.warn(
+      "Firebase Admin não está configurado. Conta administrativa padrão não será criada."
+    );
+    return;
+  }
+
   if (!DEFAULT_ADMIN_EMAIL || !DEFAULT_ADMIN_PASSWORD) {
     console.warn(
       "DEFAULT_ADMIN_EMAIL ou DEFAULT_ADMIN_PASSWORD não configurados. Conta administrativa padrão não será criada."
@@ -19,7 +29,7 @@ async function initializeDefaultAdmin() {
   }
 
   try {
-    let adminUser: UserRecord | null = await adminAuth
+    let adminUser: UserRecord | null = await auth
       .getUserByEmail(DEFAULT_ADMIN_EMAIL)
       .catch((error: unknown) => {
         if (typeof error === "object" && error && "code" in error) {
@@ -32,20 +42,20 @@ async function initializeDefaultAdmin() {
       });
 
     if (!adminUser) {
-      adminUser = await adminAuth.createUser({
+      adminUser = await auth.createUser({
         email: DEFAULT_ADMIN_EMAIL,
         password: DEFAULT_ADMIN_PASSWORD,
         displayName: DEFAULT_ADMIN_DISPLAY_NAME,
         emailVerified: true,
       });
     } else if (!adminUser.emailVerified || adminUser.displayName !== DEFAULT_ADMIN_DISPLAY_NAME) {
-      adminUser = await adminAuth.updateUser(adminUser.uid, {
+      adminUser = await auth.updateUser(adminUser.uid, {
         emailVerified: true,
         displayName: DEFAULT_ADMIN_DISPLAY_NAME,
       });
     }
 
-    await adminDb
+    await db
       .collection("userRoles")
       .doc(adminUser.uid)
       .set(
