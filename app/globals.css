@@ -13,16 +13,6 @@
   --border: 213 223 235;
 }
 
-.dark {
-  color-scheme: dark;
-  --background: 7 12 22;
-  --surface: 12 19 33;
-  --surface-elevated: 17 27 45;
-  --foreground: 233 240 247;
-  --muted: 158 173 199;
-  --border: 62 78 107;
-}
-
 @layer base {
   body {
     @apply bg-background text-foreground antialiased transition-colors duration-300;

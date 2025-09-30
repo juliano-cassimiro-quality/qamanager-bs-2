@@ -7,6 +7,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  where,
   serverTimestamp,
   addDoc,
   limit,
@@ -70,6 +71,16 @@ export async function fetchAccountHistory(accountId: string) {
 }
 
 export async function reserveAccount(accountId: string, user: { uid: string; displayName?: string | null; email?: string | null }) {
+  const accountsRef = collection(firestore, ACCOUNTS_COLLECTION);
+  const activeReservationQuery = query(accountsRef, where("ownerId", "==", user.uid));
+  const activeReservationSnapshot = await getDocs(activeReservationQuery);
+  const hasActiveReservation = activeReservationSnapshot.docs.some((docSnapshot) => {
+    const data = docSnapshot.data();
+    return (data.status ?? "free") === "busy";
+  });
+  if (hasActiveReservation) {
+    throw new Error("Você já possui uma conta reservada. Libere-a antes de reservar outra.");
+  }
   const accountRef = doc(firestore, ACCOUNTS_COLLECTION, accountId);
   await runTransaction(firestore, async (transaction) => {
     const snapshot = await transaction.get(accountRef);

@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginForm } from "@/components/auth/LoginForm";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function HomePage() {
   const { user, loading } = useAuth();
@@ -42,12 +41,12 @@ export default function HomePage() {
     }
   ];
 
-  const chips = ["Dark mode", "Gestão ágil", "BrowserStack"];
+  const chips = ["Visual limpo", "Gestão ágil", "BrowserStack"];
 
   return (
     <main className="relative isolate flex min-h-screen flex-col justify-center overflow-hidden px-6 py-16 sm:px-10 lg:px-16">
       <div className="pointer-events-none absolute inset-0 -z-30 bg-soft-grid opacity-40 [mask-image:radial-gradient(ellipse_at_center,rgba(0,0,0,0.85)_0%,transparent_70%)]" />
-      <div className="absolute -top-24 left-1/2 -z-20 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-mint/25 blur-3xl dark:bg-brand-teal/20" />
+      <div className="absolute -top-24 left-1/2 -z-20 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-mint/25 blur-3xl" />
       <div className="mx-auto grid w-full max-w-5xl gap-12 lg:grid-cols-[1fr_auto] lg:items-center">
         <header className="space-y-8">
           <div className="flex items-center justify-between">
@@ -55,7 +54,6 @@ export default function HomePage() {
               <span className="h-2 w-2 rounded-full bg-brand-teal" />
               QA Manager
             </div>
-            <ThemeToggle />
           </div>
 
           <div className="space-y-4 text-balance">
@@ -93,7 +91,7 @@ export default function HomePage() {
 
         <section className="relative">
           <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-br from-brand-teal/30 via-brand-mint/20 to-brand-amber/20 blur-2xl" aria-hidden="true" />
-          <div className="relative w-full rounded-3xl border border-border/60 bg-surface/90 p-8 shadow-2xl shadow-brand-teal/10 backdrop-blur-xl dark:border-border/40 dark:bg-surface/80">
+          <div className="relative w-full rounded-3xl border border-border/60 bg-surface/90 p-8 shadow-2xl shadow-brand-teal/10 backdrop-blur-xl">
             <div className="space-y-3 text-center">
               <span className="inline-flex items-center justify-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-teal">
                 Entrar
