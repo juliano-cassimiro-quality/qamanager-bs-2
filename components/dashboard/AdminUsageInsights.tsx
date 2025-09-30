@@ -2,12 +2,7 @@
 
 import { useMemo } from "react";
 import type { ReactNode } from "react";
-import {
-  differenceInCalendarDays,
-  format,
-  isToday,
-  parseISO,
-} from "date-fns";
+import { differenceInCalendarDays, format, isToday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import type { Account } from "@/lib/types";
@@ -15,14 +10,14 @@ import { useAccountLogs } from "@/hooks/useAccountLogs";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { PieChart } from "@/components/dashboard/PieChart";
 
-const ACCOUNT_PALETTE = [
+const ACCOUNT_PALETTE: string[] = [
   "#2563eb",
   "#7c3aed",
   "#f97316",
   "#14b8a6",
   "#ec4899",
   "#22c55e",
-] as const;
+];
 
 interface AdminUsageInsightsProps {
   accounts: Account[];
@@ -60,10 +55,13 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
   const { logs, loading, error, refresh } = useAccountLogs(150);
 
   const accountNames = useMemo(() => {
-    return accounts.reduce<Record<string, { username: string; email: string }>>((acc, account) => {
-      acc[account.id] = { username: account.username, email: account.email };
-      return acc;
-    }, {});
+    return accounts.reduce<Record<string, { username: string; email: string }>>(
+      (acc, account) => {
+        acc[account.id] = { username: account.username, email: account.email };
+        return acc;
+      },
+      {}
+    );
   }, [accounts]);
 
   const reservationLogs = useMemo(
@@ -93,7 +91,7 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
 
     const uniqueUsers = new Set(
       reservationLogs
-        .map((log) => log.email ?? log.userName ?? log.userId)
+        .map((log) => log.userName ?? log.email ?? log.userId)
         .filter(Boolean)
     );
 
@@ -108,7 +106,7 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
   const userRanking = useMemo(() => {
     const counts = new Map<string, { total: number; label: string }>();
     reservationLogs.forEach((log) => {
-      const label = log.email ?? log.userName ?? log.userId;
+      const label = log.userName ?? log.email ?? log.userId;
       const key = label ?? log.userId;
       if (!key) return;
       const entry = counts.get(key) ?? { total: 0, label: label ?? log.userId };
@@ -126,12 +124,11 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
     reservationLogs.forEach((log) => {
       const accountId = log.accountId;
       const accountInfo = accountNames[accountId];
-      const entry =
-        counter.get(accountId) ?? {
-          total: 0,
-          label: accountInfo?.username ?? accountId,
-          email: accountInfo?.email,
-        };
+      const entry = counter.get(accountId) ?? {
+        total: 0,
+        label: accountInfo?.username ?? accountId,
+        email: accountInfo?.email,
+      };
       entry.total += 1;
       counter.set(accountId, entry);
     });
@@ -194,9 +191,12 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
     <section className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-slate-900">Visão administrativa</h2>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Visão administrativa
+          </h2>
           <p className="text-sm text-slate-500">
-            Acompanhe o pulso das reservas e identifique oportunidades de otimização.
+            Acompanhe o pulso das reservas e identifique oportunidades de
+            otimização.
           </p>
         </div>
         <PrimaryButton type="button" onClick={refresh} disabled={loading}>
@@ -235,7 +235,10 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-2">
-          <InsightPanel title="Status das contas" description="Distribuição atual das licenças cadastradas.">
+          <InsightPanel
+            title="Status das contas"
+            description="Distribuição atual das licenças cadastradas."
+          >
             <div className="flex flex-col items-center gap-4 md:flex-row">
               <PieChart
                 data={statusSegments}
@@ -245,13 +248,25 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
                   subtitle: "contas",
                 }}
               />
-              <LegendList items={statusLegend} emptyLabel="Nenhuma conta cadastrada." />
+              <LegendList
+                items={statusLegend}
+                emptyLabel="Nenhuma conta cadastrada."
+              />
             </div>
           </InsightPanel>
 
-          <InsightPanel title="Contas mais acessadas" description="Como as reservas se distribuem entre as contas.">
+          <InsightPanel
+            title="Contas mais acessadas"
+            description="Como as reservas se distribuem entre as contas."
+          >
             {reservationLogs.length === 0 ? (
-              <EmptyState message={loading ? "Carregando dados de uso..." : "Nenhuma reserva registrada."} />
+              <EmptyState
+                message={
+                  loading
+                    ? "Carregando dados de uso..."
+                    : "Nenhuma reserva registrada."
+                }
+              />
             ) : (
               <div className="flex flex-col items-center gap-4 md:flex-row">
                 <PieChart
@@ -262,16 +277,26 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
                     subtitle: "registradas",
                   }}
                 />
-                <LegendList items={accountLegend} emptyLabel="Nenhuma reserva registrada." />
+                <LegendList
+                  items={accountLegend}
+                  emptyLabel="Nenhuma reserva registrada."
+                />
               </div>
             )}
           </InsightPanel>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr,1fr]">
-          <InsightPanel title="Ranking de usuários" description="Usuários que mais reservaram contas.">
+          <InsightPanel
+            title="Ranking de usuários"
+            description="Usuários que mais reservaram contas."
+          >
             {userRanking.length === 0 ? (
-              <EmptyState message={loading ? "Carregando ranking..." : "Nenhum uso registrado."} />
+              <EmptyState
+                message={
+                  loading ? "Carregando ranking..." : "Nenhum uso registrado."
+                }
+              />
             ) : (
               <ol className="space-y-3 text-sm text-slate-600">
                 {userRanking.slice(0, 8).map((entry, index) => (
@@ -294,7 +319,10 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
             )}
           </InsightPanel>
 
-          <InsightPanel title="Visão cronológica" description="Eventos mais recentes registrados no sistema.">
+          <InsightPanel
+            title="Visão cronológica"
+            description="Eventos mais recentes registrados no sistema."
+          >
             <div className="max-h-72 space-y-3 overflow-auto pr-2 text-xs text-slate-600">
               {loading && <p>Carregando histórico...</p>}
               {!loading && logs.length === 0 && (
@@ -305,7 +333,9 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
                   const timestamp = safeParseTimestamp(log.timestamp);
                   const accountInfo = accountNames[log.accountId];
                   const formattedDate = timestamp
-                    ? `${format(timestamp, "dd/MM/yyyy", { locale: ptBR })} às ${format(timestamp, "HH:mm", { locale: ptBR })}`
+                    ? `${format(timestamp, "dd/MM/yyyy", {
+                        locale: ptBR,
+                      })} às ${format(timestamp, "HH:mm", { locale: ptBR })}`
                     : "-";
                   return (
                     <div
@@ -313,9 +343,10 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
                       className="rounded-lg border border-slate-100 bg-white/60 px-3 py-2 shadow-sm"
                     >
                       <p className="font-medium text-slate-700">
-                        {log.action === "checkout" ? "Reserva" : "Devolução"} – {accountInfo?.username ?? log.accountId}
+                        {log.action === "checkout" ? "Reserva" : "Devolução"} –{" "}
+                        {accountInfo?.username ?? log.accountId}
                       </p>
-                      <p>Usuário: {log.email ?? log.userName ?? log.userId}</p>
+                      <p>Usuário: {log.userName ?? log.email ?? log.userId}</p>
                       <p>Conta: {accountInfo?.email ?? "-"}</p>
                       <p className="text-slate-500">{formattedDate}</p>
                     </div>
@@ -325,27 +356,45 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
           </InsightPanel>
         </div>
 
-        <InsightPanel title="Histórico por conta" description="Últimas movimentações de cada credencial.">
+        <InsightPanel
+          title="Histórico por conta"
+          description="Últimas movimentações de cada credencial."
+        >
           <div className="grid gap-3 md:grid-cols-2">
             {accounts.map((account) => {
               const accountHistory = historyByAccount[account.id] ?? [];
               return (
-                <div key={account.id} className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-600">
-                  <p className="font-semibold text-slate-700">{account.username}</p>
+                <div
+                  key={account.id}
+                  className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-600"
+                >
+                  <p className="font-semibold text-slate-700">
+                    {account.username}
+                  </p>
                   <p className="font-mono text-slate-500">{account.email}</p>
                   {accountHistory.length === 0 ? (
-                    <p className="mt-2 text-slate-500">Sem registros recentes.</p>
+                    <p className="mt-2 text-slate-500">
+                      Sem registros recentes.
+                    </p>
                   ) : (
                     <ul className="mt-2 space-y-1">
                       {accountHistory.slice(0, 5).map((entry) => {
                         const timestamp = safeParseTimestamp(entry.timestamp);
                         const formatted = timestamp
-                          ? `${format(timestamp, "dd/MM", { locale: ptBR })} ${format(timestamp, "HH:mm", { locale: ptBR })}`
+                          ? `${format(timestamp, "dd/MM", {
+                              locale: ptBR,
+                            })} ${format(timestamp, "HH:mm", { locale: ptBR })}`
                           : "-";
                         return (
-                          <li key={entry.id} className="flex justify-between gap-2">
+                          <li
+                            key={entry.id}
+                            className="flex justify-between gap-2"
+                          >
                             <span className="font-medium text-slate-700">
-                              {entry.action === "checkout" ? "Reservado" : "Liberado"} por {entry.email ?? entry.userName ?? entry.userId}
+                              {entry.action === "checkout"
+                                ? "Reservado"
+                                : "Liberado"}{" "}
+                              por {entry.userName ?? entry.email ?? entry.userId}
                             </span>
                             <span className="text-slate-500">{formatted}</span>
                           </li>
@@ -417,7 +466,10 @@ function LegendList({
   return (
     <ul className="w-full space-y-2 text-xs text-slate-600">
       {items.map((item) => (
-        <li key={item.label} className="flex items-center justify-between gap-4">
+        <li
+          key={item.label}
+          className="flex items-center justify-between gap-4"
+        >
           <span className="flex items-center gap-2">
             <span
               className="h-3 w-3 rounded-full"

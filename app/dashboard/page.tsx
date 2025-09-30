@@ -36,7 +36,11 @@ export default function DashboardPage() {
 
     const parts = formatter.formatToParts(now);
     const hourPart = parts.find((part) => part.type === "hour")?.value ?? "00";
-    const datePart = `${parts.find((part) => part.type === "year")?.value ?? "0000"}-${parts.find((part) => part.type === "month")?.value ?? "00"}-${parts.find((part) => part.type === "day")?.value ?? "00"}`;
+    const datePart = `${
+      parts.find((part) => part.type === "year")?.value ?? "0000"
+    }-${parts.find((part) => part.type === "month")?.value ?? "00"}-${
+      parts.find((part) => part.type === "day")?.value ?? "00"
+    }`;
     const hour = Number.parseInt(hourPart, 10);
 
     if (Number.isNaN(hour) || hour < 18) {
@@ -111,8 +115,8 @@ export default function DashboardPage() {
               user={user}
             />
           )}
-          {isAdmin && <AccountRegistrationForm />}
           {isAdmin && accounts && <AdminUsageInsights accounts={accounts} />}
+          {isAdmin && <AccountRegistrationForm />}
         </div>
       </section>
     </main>
