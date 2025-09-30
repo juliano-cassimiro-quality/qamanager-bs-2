@@ -13,7 +13,7 @@ import {
   runTransaction,
 } from "firebase/firestore";
 import { firestore } from "@/lib/firebase/client";
-import type { Account, AccountLogInput } from "@/lib/types";
+import type { Account, AccountLog, AccountLogInput } from "@/lib/types";
 
 const ACCOUNTS_COLLECTION = "browserstackAccounts";
 const LOGS_COLLECTION = "accountLogs";
@@ -152,4 +152,23 @@ export async function logAccountAction({ accountId, action, userId, userName, em
   await addDoc(logsRef, payload);
   const accountHistoryRef = collection(firestore, `${ACCOUNTS_COLLECTION}/${accountId}/history`);
   await addDoc(accountHistoryRef, payload);
+}
+
+export async function fetchRecentAccountLogs(limitCount = 50): Promise<AccountLog[]> {
+  const logsRef = collection(firestore, LOGS_COLLECTION);
+  const q = query(logsRef, orderBy("timestamp", "desc"), limit(limitCount));
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map((docSnapshot) => {
+    const data = docSnapshot.data();
+    return {
+      id: docSnapshot.id,
+      accountId: data.accountId,
+      action: data.action,
+      userId: data.userId,
+      userName: data.userName ?? null,
+      email: data.email ?? null,
+      timestamp: normalizeTimestamp(data.timestamp),
+    } satisfies AccountLog;
+  });
 }

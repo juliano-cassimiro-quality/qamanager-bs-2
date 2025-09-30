@@ -6,12 +6,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAccounts } from "@/hooks/useAccounts";
 import { AccountList } from "@/components/dashboard/AccountList";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { InviteSection } from "@/components/dashboard/InviteSection";
 import { QuickReservationCard } from "@/components/dashboard/QuickReservationCard";
 import { AccountRegistrationForm } from "@/components/dashboard/AccountRegistrationForm";
+import { AdminUsageInsights } from "@/components/dashboard/AdminUsageInsights";
 
 export default function DashboardPage() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, role } = useAuth();
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState<"all" | "free" | "busy">(
     "all"
@@ -84,6 +84,7 @@ export default function DashboardPage() {
           accounts?.filter((acc) => acc.status === "busy").length ?? 0
         }
         user={user}
+        role={role}
       />
       <section className="grid gap-4 lg:grid-cols-[2fr,1fr]">
         <div className="space-y-4">
@@ -95,8 +96,8 @@ export default function DashboardPage() {
         </div>
         <div className="space-y-4">
           <QuickReservationCard accounts={accounts} isLoading={isLoading} user={user} />
-          <AccountRegistrationForm />
-          <InviteSection />
+          {role === "admin" && <AccountRegistrationForm />}
+          {role === "admin" && accounts && <AdminUsageInsights accounts={accounts} />}
         </div>
       </section>
     </main>

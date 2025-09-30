@@ -128,13 +128,14 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
               <div>
                 <dt className="font-medium text-slate-600">Ações</dt>
                 <dd className="mt-1 flex flex-wrap gap-2">
-                  <PrimaryButton
-                    onClick={() => handleReserve(account)}
-                    disabled={isBusy && !isOwner}
-                    className="bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300"
-                  >
-                    {actionLoading[account.id] === "reserve" ? "Reservando..." : "Reservar"}
-                  </PrimaryButton>
+                  {!isBusy && (
+                    <PrimaryButton
+                      onClick={() => handleReserve(account)}
+                      className="bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300"
+                    >
+                      {actionLoading[account.id] === "reserve" ? "Reservando..." : "Reservar"}
+                    </PrimaryButton>
+                  )}
                   <button
                     onClick={() => handleRelease(account)}
                     disabled={!isBusy || (isBusy && !isOwner)}

@@ -2,6 +2,7 @@
 
 import { User } from "firebase/auth";
 import clsx from "clsx";
+import type { UserRole } from "@/lib/types";
 
 interface DashboardHeaderProps {
   user: User | null;
@@ -10,6 +11,7 @@ interface DashboardHeaderProps {
   statusFilter: "all" | "free" | "busy";
   onFilterChange: (filter: "all" | "free" | "busy") => void;
   onSignOut: () => Promise<void>;
+  role?: UserRole | null;
 }
 
 const filterOptions: { label: string; value: "all" | "free" | "busy" }[] = [
@@ -25,15 +27,25 @@ export function DashboardHeader({
   statusFilter,
   onFilterChange,
   onSignOut,
+  role,
 }: DashboardHeaderProps) {
   const freeAccounts = totalAccounts - busyAccounts;
+  const roleLabel = role === "admin" ? "Administrador" : "Colaborador";
   return (
     <header className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold text-slate-900">Dashboard de contas</h1>
-        <p className="text-sm text-slate-500">
-          Monitoramento em tempo real das licenças do BrowserStack. Olá, {user?.displayName ?? user?.email ?? "QA"}!
-        </p>
+        <div className="space-y-1">
+          <p className="text-sm text-slate-500">
+            Monitoramento em tempo real das licenças do BrowserStack. Olá, {user?.displayName ?? user?.email ?? "QA"}!
+          </p>
+          {role && (
+            <span className="inline-flex items-center gap-2 text-xs text-slate-500">
+              <span className="h-2 w-2 rounded-full bg-primary-500" aria-hidden />
+              {roleLabel}
+            </span>
+          )}
+        </div>
         <div className="flex flex-wrap gap-3 text-xs text-slate-500">
           <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600">
             Total: {totalAccounts}
