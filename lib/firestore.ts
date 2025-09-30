@@ -8,9 +8,9 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  updateDoc,
   addDoc,
   limit,
+  runTransaction,
 } from "firebase/firestore";
 import { firestore } from "@/lib/firebase/client";
 import type { Account, AccountLogInput } from "@/lib/types";
@@ -28,10 +28,12 @@ export function subscribeToAccounts(onUpdate: (accounts: Account[]) => void) {
         id: docSnapshot.id,
         username: data.username,
         email: data.email,
+        password: data.password ?? null,
         status: (data.status ?? "free") as Account["status"],
         owner: data.owner ?? null,
         ownerId: data.ownerId ?? null,
         lastUsedAt: normalizeTimestamp(data.lastUsedAt),
+        lastReturnedAt: normalizeTimestamp(data.lastReturnedAt),
       } satisfies Account;
     });
     onUpdate(accounts);
@@ -69,11 +71,21 @@ export async function fetchAccountHistory(accountId: string) {
 
 export async function reserveAccount(accountId: string, user: { uid: string; displayName?: string | null; email?: string | null }) {
   const accountRef = doc(firestore, ACCOUNTS_COLLECTION, accountId);
-  await updateDoc(accountRef, {
-    status: "busy",
-    owner: user.displayName ?? user.email ?? "Usuário",
-    ownerId: user.uid,
-    lastUsedAt: new Date().toISOString(),
+  await runTransaction(firestore, async (transaction) => {
+    const snapshot = await transaction.get(accountRef);
+    if (!snapshot.exists()) {
+      throw new Error("Conta não encontrada");
+    }
+    const data = snapshot.data();
+    if (data.status === "busy" && data.ownerId && data.ownerId !== user.uid) {
+      throw new Error("Conta já está em uso");
+    }
+    transaction.update(accountRef, {
+      status: "busy",
+      owner: user.displayName ?? user.email ?? "Usuário",
+      ownerId: user.uid,
+      lastUsedAt: new Date().toISOString(),
+    });
   });
   await logAccountAction({
     accountId,
@@ -86,10 +98,17 @@ export async function reserveAccount(accountId: string, user: { uid: string; dis
 
 export async function releaseAccount(accountId: string, user: { uid: string; displayName?: string | null; email?: string | null }) {
   const accountRef = doc(firestore, ACCOUNTS_COLLECTION, accountId);
-  await updateDoc(accountRef, {
-    status: "free",
-    owner: null,
-    ownerId: null,
+  await runTransaction(firestore, async (transaction) => {
+    const snapshot = await transaction.get(accountRef);
+    if (!snapshot.exists()) {
+      throw new Error("Conta não encontrada");
+    }
+    transaction.update(accountRef, {
+      status: "free",
+      owner: null,
+      ownerId: null,
+      lastReturnedAt: new Date().toISOString(),
+    });
   });
   await logAccountAction({
     accountId,
@@ -97,6 +116,25 @@ export async function releaseAccount(accountId: string, user: { uid: string; dis
     userId: user.uid,
     userName: user.displayName,
     email: user.email,
+  });
+}
+
+export async function createAccount(account: {
+  username: string;
+  email: string;
+  password: string;
+}) {
+  const accountsRef = collection(firestore, ACCOUNTS_COLLECTION);
+  await addDoc(accountsRef, {
+    username: account.username,
+    email: account.email,
+    password: account.password,
+    status: "free",
+    owner: null,
+    ownerId: null,
+    lastUsedAt: null,
+    lastReturnedAt: null,
+    createdAt: serverTimestamp(),
   });
 }
 

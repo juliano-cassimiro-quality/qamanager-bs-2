@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccounts } from "@/hooks/useAccounts";
 import { AccountList } from "@/components/dashboard/AccountList";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { InviteSection } from "@/components/dashboard/InviteSection";
+import { QuickReservationCard } from "@/components/dashboard/QuickReservationCard";
+import { AccountRegistrationForm } from "@/components/dashboard/AccountRegistrationForm";
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth();
@@ -15,6 +17,41 @@ export default function DashboardPage() {
     "all"
   );
   const { accounts, isLoading, error } = useAccounts();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Sao_Paulo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(now);
+    const hourPart = parts.find((part) => part.type === "hour")?.value ?? "00";
+    const datePart = `${parts.find((part) => part.type === "year")?.value ?? "0000"}-${parts.find((part) => part.type === "month")?.value ?? "00"}-${parts.find((part) => part.type === "day")?.value ?? "00"}`;
+    const hour = Number.parseInt(hourPart, 10);
+
+    if (Number.isNaN(hour) || hour < 18) {
+      return;
+    }
+
+    const storageKey = `bs-daily-reset-${datePart}`;
+    const alreadyReset = window.localStorage.getItem(storageKey);
+    if (alreadyReset) {
+      return;
+    }
+
+    fetch("/api/reset", { method: "POST" }).catch((err) => {
+      console.error("Falha ao resetar contas automaticamente", err);
+    });
+    window.localStorage.setItem(storageKey, new Date().toISOString());
+  }, []);
 
   const filteredAccounts = useMemo(() => {
     if (!accounts) return [];
@@ -56,7 +93,11 @@ export default function DashboardPage() {
             error={error}
           />
         </div>
-        <InviteSection />
+        <div className="space-y-4">
+          <QuickReservationCard accounts={accounts} isLoading={isLoading} user={user} />
+          <AccountRegistrationForm />
+          <InviteSection />
+        </div>
       </section>
     </main>
   );
