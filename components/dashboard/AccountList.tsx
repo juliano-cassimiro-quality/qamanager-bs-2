@@ -20,6 +20,9 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
   const [loadingHistory, setLoadingHistory] = useState<Record<string, boolean>>({});
   const [actionLoading, setActionLoading] = useState<Record<string, "reserve" | "release" | null>>({});
   const canViewHistory = role === "admin";
+  const userHasActiveReservation = accounts.some(
+    (account) => account.status === "busy" && account.ownerId === user?.uid
+  );
 
   const handleReserve = async (account: Account) => {
     if (!user) return;
@@ -30,6 +33,10 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
         displayName: user.displayName,
         email: user.email,
       });
+    } catch (error) {
+      if (error instanceof Error) {
+        alert(error.message);
+      }
     } finally {
       setActionLoading((prev) => ({ ...prev, [account.id]: null }));
     }
@@ -79,6 +86,7 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
       {accounts.map((account) => {
         const isBusy = account.status === "busy";
         const isOwner = account.ownerId && user?.uid === account.ownerId;
+        const hasOtherReservation = userHasActiveReservation && !isOwner;
         const currentHistory = history[account.id] ?? [];
         const historyLoaded = !!history[account.id];
 
@@ -136,6 +144,7 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
                     <PrimaryButton
                       onClick={() => handleReserve(account)}
                       className="bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300"
+                      disabled={hasOtherReservation}
                     >
                       {actionLoading[account.id] === "reserve" ? "Reservando..." : "Reservar"}
                     </PrimaryButton>
@@ -150,6 +159,12 @@ export function AccountList({ accounts, isLoading, error }: AccountListProps) {
                 </dd>
               </div>
             </dl>
+
+            {hasOtherReservation && !isBusy && (
+              <p className="mt-3 text-xs font-medium text-amber-600">
+                Libere a sua conta atual antes de reservar outra.
+              </p>
+            )}
 
             {canViewHistory && (
               <section className="mt-4 border-t border-slate-100 pt-4">
