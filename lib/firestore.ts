@@ -12,6 +12,8 @@ import {
   addDoc,
   limit,
   runTransaction,
+  updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { firestore } from "@/lib/firebase/client";
 import type { Account, AccountLog, AccountLogInput } from "@/lib/types";
@@ -147,6 +149,47 @@ export async function createAccount(account: {
     lastReturnedAt: null,
     createdAt: serverTimestamp(),
   });
+}
+
+export async function updateAccount(
+  accountId: string,
+  updates: {
+    username?: string;
+    email?: string;
+    password?: string | null;
+    status?: Account["status"];
+  },
+) {
+  const accountRef = doc(firestore, ACCOUNTS_COLLECTION, accountId);
+  const payload: Record<string, unknown> = {};
+
+  if (typeof updates.username === "string") {
+    payload.username = updates.username;
+  }
+  if (typeof updates.email === "string") {
+    payload.email = updates.email;
+  }
+  if (updates.status) {
+    payload.status = updates.status;
+    if (updates.status === "free") {
+      payload.owner = null;
+      payload.ownerId = null;
+    }
+  }
+  if (updates.password !== undefined) {
+    payload.password = updates.password ?? null;
+  }
+
+  if (!Object.keys(payload).length) {
+    return;
+  }
+
+  await updateDoc(accountRef, payload);
+}
+
+export async function deleteAccount(accountId: string) {
+  const accountRef = doc(firestore, ACCOUNTS_COLLECTION, accountId);
+  await deleteDoc(accountRef);
 }
 
 export async function logAccountAction({ accountId, action, userId, userName, email }: AccountLogInput) {
