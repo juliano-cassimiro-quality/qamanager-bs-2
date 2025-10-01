@@ -9,6 +9,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { QuickReservationCard } from "@/components/dashboard/QuickReservationCard";
 import { AccountRegistrationForm } from "@/components/dashboard/AccountRegistrationForm";
 import { AdminUsageInsights } from "@/components/dashboard/AdminUsageInsights";
+import { AccountImportExport } from "@/components/dashboard/AccountImportExport";
 
 export default function DashboardPage() {
   const { user, loading, signOut, role } = useAuth();
@@ -116,6 +117,9 @@ export default function DashboardPage() {
             />
           )}
           {isAdmin && accounts && <AdminUsageInsights accounts={accounts} />}
+          {isAdmin && (
+            <AccountImportExport accounts={accounts ?? undefined} />
+          )}
           {isAdmin && <AccountRegistrationForm />}
         </div>
       </section>
