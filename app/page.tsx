@@ -23,86 +23,53 @@ export default function HomePage() {
     );
   }
 
-  const highlights = [
-    {
-      title: "Status rápido",
-      caption: "Reservas",
-      accent: "from-brand-teal/70 via-brand-mint/40 to-transparent"
-    },
-    {
-      title: "Equipe alinhada",
-      caption: "Fluxos",
-      accent: "from-brand-amber/60 via-brand-terracotta/30 to-transparent"
-    },
-    {
-      title: "Segurança nativa",
-      caption: "Acessos",
-      accent: "from-brand-leaf/60 via-brand-lime/30 to-transparent"
-    }
-  ];
-
-  const chips = ["Visual limpo", "Gestão ágil", "BrowserStack"];
-
   return (
-    <main className="relative isolate flex min-h-screen flex-col justify-center overflow-hidden px-6 py-16 sm:px-10 lg:px-16">
-      <div className="pointer-events-none absolute inset-0 -z-30 bg-soft-grid opacity-40 [mask-image:radial-gradient(ellipse_at_center,rgba(0,0,0,0.85)_0%,transparent_70%)]" />
-      <div className="absolute -top-24 left-1/2 -z-20 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-mint/25 blur-3xl" />
-      <div className="mx-auto grid w-full max-w-5xl gap-12 lg:grid-cols-[1fr_auto] lg:items-center">
-        <header className="space-y-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 rounded-full border border-border/60 bg-surface/80 px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-muted shadow-sm backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-brand-teal" />
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950/5 px-4 py-12">
+      <div className="pointer-events-none absolute inset-0 -z-30 bg-soft-grid opacity-40 [mask-image:radial-gradient(circle_at_center,rgba(0,0,0,0.92)_0%,transparent_70%)]" />
+      <div className="absolute -top-32 left-1/2 -z-20 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-brand-mint/20 blur-3xl" />
+      <div className="absolute bottom-0 right-0 -z-10 h-64 w-64 translate-x-1/3 translate-y-1/3 rounded-full bg-brand-amber/10 blur-3xl" />
+      <div className="grid w-full max-w-4xl overflow-hidden rounded-3xl border border-border/40 bg-surface/80 shadow-2xl backdrop-blur-xl md:grid-cols-[1.1fr,1fr]">
+        <aside className="relative hidden flex-col justify-between bg-gradient-to-br from-brand-teal via-brand-mint to-brand-lime p-8 text-white md:flex">
+          <div className="space-y-6">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-white/80">
+              <span className="h-2 w-2 rounded-full bg-white" />
               QA Manager
+            </span>
+            <div className="space-y-4">
+              <h1 className="text-3xl font-semibold leading-tight">Controle compacto das contas BrowserStack</h1>
+              <p className="text-sm text-white/80">
+                Visão rápida do status das licenças e fluxo de reserva/desbloqueio com poucos cliques. Segurança e rastreabilidade para o time de QA.
+              </p>
             </div>
           </div>
-
-          <div className="space-y-4 text-balance">
-            <h1 className="text-4xl font-semibold text-foreground sm:text-5xl">Operação limpa, foco no teste</h1>
-            <p className="max-w-xl text-base text-muted">
-              Tudo o que importa para controlar reservas BrowserStack com clareza imediata.
+          <ul className="space-y-3 text-sm text-white/80">
+            <li className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-white" /> Status ao vivo das contas
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-white" /> Histórico de uso centralizado
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-white" /> Reservas em um toque
+            </li>
+          </ul>
+        </aside>
+        <section className="flex flex-col gap-8 p-8 sm:p-10">
+          <header className="space-y-3 text-center md:text-left">
+            <span className="inline-flex items-center justify-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-brand-teal">
+              Acesso seguro
+            </span>
+            <h2 className="text-2xl font-semibold text-foreground">Entre no painel</h2>
+            <p className="text-sm text-muted">
+              Utilize seu e-mail corporativo Quality Digital para liberar o dashboard.
             </p>
+          </header>
+          <div className="rounded-2xl border border-border/60 bg-white/70 p-6 shadow-lg shadow-brand-teal/5">
+            <LoginForm />
           </div>
-
-          <div className="flex flex-wrap gap-2 text-xs text-muted">
-            {chips.map((chip) => (
-              <span
-                key={chip}
-                className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-surface-elevated/80 px-4 py-2 font-medium text-foreground/80 shadow-sm"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-brand-mint" />
-                {chip}
-              </span>
-            ))}
-          </div>
-
-          <section className="grid gap-4 sm:grid-cols-3">
-            {highlights.map((item) => (
-              <article
-                key={item.title}
-                className="relative overflow-hidden rounded-2xl border border-border/60 bg-surface/90 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${item.accent}`} aria-hidden="true" />
-                <p className="text-xs uppercase tracking-[0.3em] text-muted">{item.caption}</p>
-                <h2 className="mt-3 text-lg font-semibold text-foreground">{item.title}</h2>
-              </article>
-            ))}
-          </section>
-        </header>
-
-        <section className="relative">
-          <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-br from-brand-teal/30 via-brand-mint/20 to-brand-amber/20 blur-2xl" aria-hidden="true" />
-          <div className="relative w-full rounded-3xl border border-border/60 bg-surface/90 p-8 shadow-2xl shadow-brand-teal/10 backdrop-blur-xl">
-            <div className="space-y-3 text-center">
-              <span className="inline-flex items-center justify-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-brand-teal">
-                Entrar
-              </span>
-              <h2 className="text-2xl font-semibold text-foreground">Painel QA</h2>
-              <p className="text-sm text-muted">Acesso rápido e seguro.</p>
-            </div>
-            <div className="mt-8">
-              <LoginForm />
-            </div>
-          </div>
+          <p className="text-center text-[0.75rem] text-muted md:text-left">
+            Dica: cadastre-se uma vez para validar o e-mail. Depois é só entrar com a mesma senha.
+          </p>
         </section>
       </div>
     </main>

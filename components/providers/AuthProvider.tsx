@@ -16,6 +16,8 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { firebaseAuth } from "@/lib/firebase/client";
 import { firestore } from "@/lib/firebase/client";
 import type { UserRole } from "@/lib/types";
+import { mapFirebaseError } from "@/lib/firebase/errors";
+import { useToast } from "@/components/providers/ToastProvider";
 
 const ALLOWED_DOMAINS = ["qualitydigital.global", "acct.global"]; // Domains allowed to authenticate
 
@@ -27,7 +29,6 @@ interface AuthContextValue {
   registerWithEmail: (email: string, password: string, displayName?: string) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
-  authError: string | null;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -36,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<UserRole | null>(null);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, (firebaseUser) => {
@@ -45,7 +46,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const isAllowed = emailDomain ? ALLOWED_DOMAINS.includes(emailDomain) : false;
 
         if (!isAllowed) {
-          setAuthError("Este e-mail não possui permissão para acessar a plataforma.");
+          showToast({
+            title: "Acesso negado",
+            description: "Este e-mail não possui permissão para acessar a plataforma.",
+            intent: "error",
+          });
           void firebaseSignOut(firebaseAuth);
           setUser(null);
           setLoading(false);
@@ -53,23 +58,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (!firebaseUser.emailVerified) {
-          setAuthError("Seu e-mail ainda não foi verificado. Verifique a caixa de entrada para continuar.");
+          showToast({
+            title: "Verificação pendente",
+            description: "Confirme seu e-mail corporativo antes de continuar.",
+            intent: "warning",
+          });
           void firebaseSignOut(firebaseAuth);
           setUser(null);
           setLoading(false);
           return;
         }
 
-        setAuthError(null);
         setUser(firebaseUser);
       } else {
         setUser(null);
-        setAuthError(null);
       }
       setLoading(false);
     });
     return unsubscribe;
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     if (!user) {
@@ -90,6 +97,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
       (error) => {
         console.error("Erro ao carregar papel do usuário", error);
+        const handledError = mapFirebaseError(
+          error,
+          "Não foi possível carregar o perfil do usuário."
+        );
+        showToast({
+          title: "Erro ao carregar permissões",
+          description: handledError.message,
+          intent: "error",
+        });
         setRole("user");
       }
     );
@@ -97,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       unsubscribe();
     };
-  }, [user]);
+  }, [showToast, user]);
 
   const ensureAllowedEmail = useCallback((email: string) => {
     const trimmedEmail = email.trim().toLowerCase();
@@ -110,12 +126,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithEmail = useCallback(
     async (email: string, password: string) => {
-      const normalizedEmail = ensureAllowedEmail(email);
-      const credentials = await signInWithEmailAndPassword(firebaseAuth, normalizedEmail, password);
-      if (!credentials.user.emailVerified) {
-        await sendEmailVerification(credentials.user).catch(() => undefined);
-        await firebaseSignOut(firebaseAuth);
-        throw new Error("Confirme seu e-mail antes de acessar. Um novo link de verificação foi enviado.");
+      try {
+        const normalizedEmail = ensureAllowedEmail(email);
+        const credentials = await signInWithEmailAndPassword(
+          firebaseAuth,
+          normalizedEmail,
+          password
+        );
+        if (!credentials.user.emailVerified) {
+          await sendEmailVerification(credentials.user).catch(() => undefined);
+          await firebaseSignOut(firebaseAuth);
+          throw new Error(
+            "Confirme seu e-mail antes de acessar. Um novo link de verificação foi enviado."
+          );
+        }
+      } catch (error) {
+        throw mapFirebaseError(error, "Não foi possível entrar. Tente novamente.");
       }
     },
     [ensureAllowedEmail]
@@ -123,9 +149,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const registerWithEmail = useCallback(
     async (email: string, password: string, displayName?: string) => {
-      const normalizedEmail = ensureAllowedEmail(email);
       try {
-        const userCredential = await createUserWithEmailAndPassword(firebaseAuth, normalizedEmail, password);
+        const normalizedEmail = ensureAllowedEmail(email);
+        const userCredential = await createUserWithEmailAndPassword(
+          firebaseAuth,
+          normalizedEmail,
+          password
+        );
         if (displayName) {
           await updateProfile(userCredential.user, { displayName });
         }
@@ -133,9 +163,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await firebaseSignOut(firebaseAuth);
       } catch (error) {
         if (error instanceof FirebaseError && error.code === "auth/operation-not-allowed") {
-          throw new Error("Criação automática de contas está desabilitada. Entre em contato com um administrador para obter acesso.");
+          throw new Error(
+            "Criação automática de contas está desabilitada. Entre em contato com um administrador para obter acesso."
+          );
         }
-        throw error;
+        throw mapFirebaseError(error, "Não foi possível criar a conta. Tente novamente.");
       }
     },
     [ensureAllowedEmail]
@@ -143,19 +175,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const sendPasswordReset = useCallback(
     async (email: string) => {
-      const normalizedEmail = ensureAllowedEmail(email);
-      await sendPasswordResetEmail(firebaseAuth, normalizedEmail);
+      try {
+        const normalizedEmail = ensureAllowedEmail(email);
+        await sendPasswordResetEmail(firebaseAuth, normalizedEmail);
+      } catch (error) {
+        throw mapFirebaseError(error, "Não foi possível enviar o e-mail de redefinição.");
+      }
     },
     [ensureAllowedEmail]
   );
 
   const signOut = useCallback(async () => {
-    await firebaseSignOut(firebaseAuth);
+    try {
+      await firebaseSignOut(firebaseAuth);
+    } catch (error) {
+      throw mapFirebaseError(error, "Não foi possível encerrar a sessão.");
+    }
   }, []);
 
   const value = useMemo(
-    () => ({ user, role, loading, signInWithEmail, registerWithEmail, sendPasswordReset, signOut, authError }),
-    [authError, loading, registerWithEmail, role, sendPasswordReset, signInWithEmail, signOut, user]
+    () => ({ user, role, loading, signInWithEmail, registerWithEmail, sendPasswordReset, signOut }),
+    [loading, registerWithEmail, role, sendPasswordReset, signInWithEmail, signOut, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
