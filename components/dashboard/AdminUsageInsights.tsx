@@ -211,7 +211,7 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
       )}
 
       <div className="grid gap-6">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Reservas hoje"
             value={summaryStats.today}
@@ -234,24 +234,28 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
           />
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           <InsightPanel
             title="Status das contas"
             description="Distribuição atual das licenças cadastradas."
           >
-            <div className="flex flex-col items-center gap-4 md:flex-row">
-              <PieChart
-                data={statusSegments}
-                centralLabel={{
-                  title: "Total",
-                  value: String(statusSummary.total),
-                  subtitle: "contas",
-                }}
-              />
-              <LegendList
-                items={statusLegend}
-                emptyLabel="Nenhuma conta cadastrada."
-              />
+            <div className="flex flex-col gap-6 lg:flex-row lg:flex-wrap lg:items-start">
+              <div className="flex w-full justify-center lg:w-auto lg:justify-start">
+                <PieChart
+                  data={statusSegments}
+                  centralLabel={{
+                    title: "Total",
+                    value: String(statusSummary.total),
+                    subtitle: "contas",
+                  }}
+                />
+              </div>
+              <div className="w-full lg:min-w-[14rem] lg:flex-1">
+                <LegendList
+                  items={statusLegend}
+                  emptyLabel="Nenhuma conta cadastrada."
+                />
+              </div>
             </div>
           </InsightPanel>
 
@@ -268,19 +272,23 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
                 }
               />
             ) : (
-              <div className="flex flex-col items-center gap-4 md:flex-row">
-                <PieChart
-                  data={accountSegments}
-                  centralLabel={{
-                    title: "Reservas",
-                    value: String(summaryStats.totalReservations),
-                    subtitle: "registradas",
-                  }}
-                />
-                <LegendList
-                  items={accountLegend}
-                  emptyLabel="Nenhuma reserva registrada."
-                />
+              <div className="flex flex-col gap-6 lg:flex-row lg:flex-wrap lg:items-start">
+                <div className="flex w-full justify-center lg:w-auto lg:justify-start">
+                  <PieChart
+                    data={accountSegments}
+                    centralLabel={{
+                      title: "Reservas",
+                      value: String(summaryStats.totalReservations),
+                      subtitle: "registradas",
+                    }}
+                  />
+                </div>
+                <div className="w-full lg:min-w-[14rem] lg:flex-1">
+                  <LegendList
+                    items={accountLegend}
+                    emptyLabel="Nenhuma reserva registrada."
+                  />
+                </div>
               </div>
             )}
           </InsightPanel>
