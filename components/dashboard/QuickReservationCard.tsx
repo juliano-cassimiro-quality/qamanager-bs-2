@@ -8,6 +8,7 @@ import type { User } from "firebase/auth";
 import type { Account } from "@/lib/types";
 import { reserveAccount, releaseAccount } from "@/lib/firestore";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { useToast } from "@/components/providers/ToastProvider";
 
 interface QuickReservationCardProps {
   accounts: Account[] | undefined;
@@ -16,10 +17,9 @@ interface QuickReservationCardProps {
 }
 
 export function QuickReservationCard({ accounts, isLoading, user }: QuickReservationCardProps) {
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isReserving, setIsReserving] = useState(false);
   const [isReleasing, setIsReleasing] = useState(false);
+  const { showToast } = useToast();
 
   const activeAccount = useMemo(() => {
     if (!accounts || !user) return undefined;
@@ -37,27 +37,38 @@ export function QuickReservationCard({ accounts, isLoading, user }: QuickReserva
 
   const handleReserve = async () => {
     if (!user) {
-      setError("Faça login para reservar uma conta.");
+      showToast({
+        title: "Faça login",
+        description: "Entre com sua conta corporativa para reservar uma credencial.",
+        intent: "warning",
+      });
       return;
     }
     if (!accounts || isLoading) {
       return;
     }
     if (activeAccount) {
-      setError("Você já está com uma conta reservada. Libere antes de pegar outra.");
+      showToast({
+        title: "Conta já reservada",
+        description: "Libere a conta atual antes de pegar outra.",
+        intent: "info",
+      });
       return;
     }
 
     const freeAccounts = accounts.filter((account) => account.status === "free");
     if (freeAccounts.length === 0) {
-      setError("Nenhuma conta livre no momento.");
+      showToast({
+        title: "Sem contas disponíveis",
+        description: "Todas as contas estão em uso. Tente novamente em instantes.",
+        intent: "info",
+      });
       return;
     }
 
     const selectedAccount = freeAccounts[Math.floor(Math.random() * freeAccounts.length)];
 
     setIsReserving(true);
-    setError(null);
     try {
       await reserveAccount(selectedAccount.id, {
         uid: user.uid,
@@ -65,10 +76,18 @@ export function QuickReservationCard({ accounts, isLoading, user }: QuickReserva
         email: user.email,
       });
       const now = format(new Date(), "HH:mm", { locale: ptBR });
-      setFeedback(`Conta ${selectedAccount.username} reservada às ${now}. Senha: ${selectedAccount.password ?? "-"}.`);
+      showToast({
+        title: `Conta ${selectedAccount.username} reservada`,
+        description: `Retirada registrada às ${now}. Senha: ${selectedAccount.password ?? "-"}.`,
+        intent: "success",
+      });
     } catch (err) {
       console.error(err);
-      setError((err as Error).message ?? "Erro ao reservar conta.");
+      showToast({
+        title: "Erro ao reservar conta",
+        description: (err as Error).message ?? "Tente novamente em instantes.",
+        intent: "error",
+      });
     } finally {
       setIsReserving(false);
     }
@@ -79,7 +98,6 @@ export function QuickReservationCard({ accounts, isLoading, user }: QuickReserva
       return;
     }
     setIsReleasing(true);
-    setError(null);
     try {
       await releaseAccount(activeAccount.id, {
         uid: user.uid,
@@ -87,10 +105,18 @@ export function QuickReservationCard({ accounts, isLoading, user }: QuickReserva
         email: user.email,
       });
       const now = format(new Date(), "HH:mm", { locale: ptBR });
-      setFeedback(`Conta ${activeAccount.username} liberada às ${now}.`);
+      showToast({
+        title: `Conta ${activeAccount.username} devolvida`,
+        description: `Devolução registrada às ${now}.`,
+        intent: "success",
+      });
     } catch (err) {
       console.error(err);
-      setError((err as Error).message ?? "Erro ao liberar conta.");
+      showToast({
+        title: "Erro ao liberar conta",
+        description: (err as Error).message ?? "Tente novamente em instantes.",
+        intent: "error",
+      });
     } finally {
       setIsReleasing(false);
     }
@@ -138,9 +164,6 @@ export function QuickReservationCard({ accounts, isLoading, user }: QuickReserva
             {isReleasing ? "Liberando..." : "Devolver conta"}
           </button>
         </div>
-
-        {feedback && <p className="text-xs text-emerald-700">{feedback}</p>}
-        {error && <p className="text-xs text-rose-600">{error}</p>}
       </div>
     </section>
   );

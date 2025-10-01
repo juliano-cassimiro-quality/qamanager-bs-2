@@ -87,7 +87,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-10">
+    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-8">
+      {!isAdmin && (
+        <QuickReservationCard
+          accounts={accounts}
+          isLoading={isLoading}
+          user={user}
+        />
+      )}
       <DashboardHeader
         onSignOut={signOut}
         statusFilter={statusFilter}
@@ -99,26 +106,31 @@ export default function DashboardPage() {
         user={user}
         role={role}
       />
-      <section className="grid gap-4 lg:grid-cols-[2fr,1fr]">
-        <div className="space-y-4">
+      {isAdmin ? (
+        <section className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+          <div className="space-y-4">
+            <AccountList
+              accounts={filteredAccounts}
+              isLoading={isLoading}
+              error={error}
+              role={role}
+            />
+          </div>
+          <div className="space-y-4">
+            {accounts && <AdminUsageInsights accounts={accounts} />}
+            <AccountRegistrationForm />
+          </div>
+        </section>
+      ) : (
+        <section className="space-y-4">
           <AccountList
             accounts={filteredAccounts}
             isLoading={isLoading}
             error={error}
+            role={role}
           />
-        </div>
-        <div className="space-y-4">
-          {!isAdmin && (
-            <QuickReservationCard
-              accounts={accounts}
-              isLoading={isLoading}
-              user={user}
-            />
-          )}
-          {isAdmin && accounts && <AdminUsageInsights accounts={accounts} />}
-          {isAdmin && <AccountRegistrationForm />}
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }

@@ -4,34 +4,48 @@ import { FormEvent, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { TextInput } from "@/components/ui/TextInput";
+import { useToast } from "@/components/providers/ToastProvider";
 
 export function LoginForm() {
-  const { signInWithEmail, registerWithEmail, sendPasswordReset, authError } = useAuth();
+  const { signInWithEmail, registerWithEmail, sendPasswordReset } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const { showToast } = useToast();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
-    setInfo(null);
     setLoading(true);
     try {
       if (mode === "login") {
         await signInWithEmail(email, password);
+        showToast({
+          title: "Login realizado",
+          description: "Bem-vindo(a) de volta!",
+          intent: "success",
+          duration: 4000,
+        });
       } else {
         await registerWithEmail(email, password, name);
-        setInfo("Conta criada. Enviamos um e-mail de verificação para ativar o acesso.");
+        showToast({
+          title: "Conta criada",
+          description: "Enviamos um e-mail de verificação para ativar o acesso.",
+          intent: "success",
+        });
+        setName("");
+        setPassword("");
         setMode("login");
       }
     } catch (err) {
       console.error(err);
-      setError((err as Error).message ?? "Não foi possível concluir a solicitação.");
+      showToast({
+        title: "Não foi possível concluir a solicitação",
+        description: (err as Error).message ?? "Tente novamente em instantes.",
+        intent: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -39,18 +53,28 @@ export function LoginForm() {
 
   const handlePasswordReset = async () => {
     if (!email) {
-      setError("Informe um e-mail corporativo para redefinir a senha.");
+      showToast({
+        title: "Informe seu e-mail",
+        description: "Digite um e-mail corporativo para redefinir a senha.",
+        intent: "warning",
+      });
       return;
     }
-    setError(null);
-    setInfo(null);
     setResetLoading(true);
     try {
       await sendPasswordReset(email);
-      setInfo("Enviamos um e-mail com instruções para redefinir sua senha.");
+      showToast({
+        title: "Verifique sua caixa de entrada",
+        description: "Enviamos um e-mail com instruções para redefinir a senha.",
+        intent: "info",
+      });
     } catch (err) {
       console.error(err);
-      setError((err as Error).message ?? "Não foi possível enviar o e-mail de redefinição.");
+      showToast({
+        title: "Não foi possível enviar o e-mail",
+        description: (err as Error).message ?? "Tente novamente em instantes.",
+        intent: "error",
+      });
     } finally {
       setResetLoading(false);
     }
@@ -85,10 +109,6 @@ export function LoginForm() {
           minLength={6}
           required
         />
-        {(error || (mode === "login" && authError)) && (
-          <p className="text-sm text-brand-terracotta">{error ?? authError}</p>
-        )}
-        {info && <p className="text-sm text-brand-mint">{info}</p>}
         <PrimaryButton type="submit" className="w-full" disabled={loading}>
           {loading ? "Processando..." : mode === "login" ? "Entrar" : "Criar conta"}
         </PrimaryButton>
@@ -112,8 +132,7 @@ export function LoginForm() {
           className="font-semibold text-brand-teal hover:text-brand-mint"
           onClick={() => {
             setMode(mode === "login" ? "register" : "login");
-            setError(null);
-            setInfo(null);
+            setPassword("");
           }}
         >
           {mode === "login" ? "Criar conta" : "Entrar"}

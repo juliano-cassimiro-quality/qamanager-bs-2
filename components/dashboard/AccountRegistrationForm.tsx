@@ -6,6 +6,7 @@ import { createAccount } from "@/lib/firestore";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { TextInput } from "@/components/ui/TextInput";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/components/providers/ToastProvider";
 
 export function AccountRegistrationForm() {
   const { role } = useAuth();
@@ -13,8 +14,7 @@ export function AccountRegistrationForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   if (role !== "admin") {
     return null;
@@ -23,23 +23,33 @@ export function AccountRegistrationForm() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!username || !email || !password) {
-      setError("Preencha todos os campos para cadastrar uma nova conta.");
+      showToast({
+        title: "Complete os campos",
+        description: "Usuário, e-mail e senha são obrigatórios para cadastrar a conta.",
+        intent: "warning",
+      });
       return;
     }
 
     setIsSubmitting(true);
-    setError(null);
-    setSuccess(null);
 
     try {
       await createAccount({ username, email, password });
-      setSuccess(`Conta ${username} adicionada com sucesso.`);
+      showToast({
+        title: "Conta cadastrada",
+        description: `Conta ${username} adicionada com sucesso.`,
+        intent: "success",
+      });
       setUsername("");
       setEmail("");
       setPassword("");
     } catch (err) {
       console.error(err);
-      setError((err as Error).message ?? "Erro ao cadastrar conta.");
+      showToast({
+        title: "Erro ao cadastrar conta",
+        description: (err as Error).message ?? "Tente novamente em instantes.",
+        intent: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -82,9 +92,6 @@ export function AccountRegistrationForm() {
           {isSubmitting ? "Salvando..." : "Adicionar conta"}
         </PrimaryButton>
       </form>
-
-      {success && <p className="mt-3 text-xs text-emerald-700">{success}</p>}
-      {error && <p className="mt-3 text-xs text-rose-600">{error}</p>}
     </section>
   );
 }
