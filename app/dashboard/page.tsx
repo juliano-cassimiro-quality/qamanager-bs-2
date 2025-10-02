@@ -10,6 +10,7 @@ import { QuickReservationCard } from "@/components/dashboard/QuickReservationCar
 import { AccountRegistrationForm } from "@/components/dashboard/AccountRegistrationForm";
 import { AdminUsageInsights } from "@/components/dashboard/AdminUsageInsights";
 import { AccountImportExport } from "@/components/dashboard/AccountImportExport";
+import { AdminHistoryFeed } from "@/components/dashboard/AdminHistoryFeed";
 
 export default function DashboardPage() {
   const { user, loading, signOut, role } = useAuth();
@@ -107,6 +108,9 @@ export default function DashboardPage() {
             isLoading={isLoading}
             error={error}
           />
+          {isAdmin && (
+            <AdminHistoryFeed accounts={accounts ?? []} />
+          )}
         </div>
         <div className="space-y-4">
           {!isAdmin && (

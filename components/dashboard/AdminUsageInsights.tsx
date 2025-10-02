@@ -2,13 +2,14 @@
 
 import { useMemo } from "react";
 import type { ReactNode } from "react";
-import { differenceInCalendarDays, format, isToday, parseISO } from "date-fns";
+import { differenceInCalendarDays, format, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import type { Account } from "@/lib/types";
 import { useAccountLogs } from "@/hooks/useAccountLogs";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { PieChart } from "@/components/dashboard/PieChart";
+import { safeParseTimestamp } from "@/lib/date";
 
 const ACCOUNT_PALETTE: string[] = [
   "#2563eb",
@@ -28,16 +29,6 @@ interface LegendItem {
   value: number;
   color: string;
   percentage: number;
-}
-
-function safeParseTimestamp(timestamp: string | null | undefined) {
-  if (!timestamp) return null;
-  try {
-    return parseISO(timestamp);
-  } catch (error) {
-    console.warn("Timestamp inválido detectado", error);
-    return null;
-  }
 }
 
 function buildLegend(data: { label: string; value: number; color: string }[]) {
@@ -286,7 +277,7 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
           </InsightPanel>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.2fr,1fr]">
+        <div className="grid gap-6">
           <InsightPanel
             title="Ranking de usuários"
             description="Usuários que mais reservaram contas."
@@ -317,42 +308,6 @@ export function AdminUsageInsights({ accounts }: AdminUsageInsightsProps) {
                 ))}
               </ol>
             )}
-          </InsightPanel>
-
-          <InsightPanel
-            title="Visão cronológica"
-            description="Eventos mais recentes registrados no sistema."
-          >
-            <div className="max-h-72 space-y-3 overflow-auto pr-2 text-xs text-slate-600">
-              {loading && <p>Carregando histórico...</p>}
-              {!loading && logs.length === 0 && (
-                <p>Nenhum evento registrado.</p>
-              )}
-              {!loading &&
-                logs.map((log) => {
-                  const timestamp = safeParseTimestamp(log.timestamp);
-                  const accountInfo = accountNames[log.accountId];
-                  const formattedDate = timestamp
-                    ? `${format(timestamp, "dd/MM/yyyy", {
-                        locale: ptBR,
-                      })} às ${format(timestamp, "HH:mm", { locale: ptBR })}`
-                    : "-";
-                  return (
-                    <div
-                      key={`${log.id}`}
-                      className="rounded-lg border border-slate-100 bg-white/60 px-3 py-2 shadow-sm"
-                    >
-                      <p className="font-medium text-slate-700">
-                        {log.action === "checkout" ? "Reserva" : "Devolução"} –{" "}
-                        {accountInfo?.username ?? log.accountId}
-                      </p>
-                      <p>Usuário: {log.userName ?? log.email ?? log.userId}</p>
-                      <p>Conta: {accountInfo?.email ?? "-"}</p>
-                      <p className="text-slate-500">{formattedDate}</p>
-                    </div>
-                  );
-                })}
-            </div>
           </InsightPanel>
         </div>
       </div>
